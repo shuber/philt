@@ -1,19 +1,20 @@
 #!/usr/bin/php
 <?php
 
-error_reporting(E_ALL);
+error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', true);
 
 require_once 'ztest/ztest.php';
 require_once __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'philt.php';
 
-$support_files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__.DIRECTORY_SEPARATOR.'support'), RecursiveIteratorIterator::SELF_FIRST);
+$support_dir = new RecursiveDirectoryIterator(__DIR__.DIRECTORY_SEPARATOR.'support');
+$support_files = new RecursiveIteratorIterator($support_dir, RecursiveIteratorIterator::SELF_FIRST);
 foreach ($support_files as $file) require_once $file;
 
 $reporter = new ztest\ConsoleReporter;
 $reporter->enable_color();
 
-$suite = new ztest\TestSuite('Philt unit tests');
+$suite = new ztest\TestSuite('philt unit tests');
 $suite->require_all(__DIR__.DIRECTORY_SEPARATOR.'unit');
 $suite->auto_fill();
 $suite->run($reporter);
