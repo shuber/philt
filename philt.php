@@ -6,56 +6,56 @@ require_once 'philt/php_template.php';
 require_once 'philt/string_template.php';
 
 class Philt {
+    public $mappings = array();
 
-    static $mappings = array();
+    function __construct() {
+        $this->register_default_extensions();
+    }
 
-    static function clear($extension = null) {
+    function clear($extensions = null) {
         $extensions = func_get_args();
         if (empty($extensions)) {
-            Philt::$mappings = array();
+            $this->mappings = array();
         } else {
-            foreach ($extensions as $extension) unset(Philt::$mappings[$extension]);
+            foreach ($extensions as $extension) unset($this->mappings[$extension]);
         }
     }
 
-    static function handler($file) {
-        if ($handlers = self::handlers($file)) return $handlers[0];
+    function handler($file) {
+        if ($handlers = $this->handlers($file)) return $handlers[0];
     }
 
-    static function handlers($file) {
+    function handlers($file) {
         $pattern = basename($file);
-        while (!empty($pattern) && !self::registered($pattern)) $pattern = preg_replace('/^[^\.]+\.?/', '', $pattern);
-        if (isset(self::$mappings[$pattern])) return self::$mappings[$pattern];
+        while (!empty($pattern) && !$this->registered($pattern)) $pattern = preg_replace('/^[^\.]+\.?/', '', $pattern);
+        if (isset($this->mappings[$pattern])) return $this->mappings[$pattern];
     }
 
-    static function register($handler, $extensions) {
+    function register($handler, $extensions) {
         $extensions = func_get_args();
         $handler = array_shift($extensions);
-        if (is_array($extensions[0])) $extensions = $extensions[0];
-        foreach ($extensions as $extension) self::register_extension($handler, $extension);
+        foreach ($extensions as $extension) $this->register_extension($handler, $extension);
     }
 
-    static function register_default_extensions() {
-        self::register('Philt\PhpTemplate', 'php');
-        self::register('Philt\StringTemplate', 'str');
+    function register_default_extensions() {
+        $this->register('Philt\PhpTemplate', 'php');
+        $this->register('Philt\StringTemplate', 'str');
     }
 
-    static function registered($extension) {
-        return !empty(self::$mappings[$extension]);
+    function registered($extension) {
+        return isset($this->mappings[$extension]);
     }
 
-    static function template($file, $options = array()) {
-        if ($handler = self::handler($file)) {
+    function template($file, $options = array()) {
+        if ($handler = $this->handler($file)) {
             return new $handler($file, $options);
         } else {
             throw new RuntimeException('No template handler registered for '.basename($file));
         }
     }
 
-    static protected function register_extension($handler, $extension) {
-        if (!isset(self::$mappings[$extension])) self::$mappings[$extension] = array();
-        if (!in_array($handler, self::$mappings[$extension])) array_unshift(self::$mappings[$extension], $handler);
+    protected function register_extension($handler, $extension) {
+        if (!isset($this->mappings[$extension])) $this->mappings[$extension] = array();
+        if (!in_array($handler, $this->mappings[$extension])) array_unshift($this->mappings[$extension], $handler);
     }
 }
-
-Philt::register_default_extensions();

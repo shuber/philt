@@ -22,6 +22,14 @@ function assert_no_difference($expression, $lambda) {
     assert_equal($value, eval($expression));
 }
 
+function assert_empty($object, $message = 'was not expected to be empty') {
+    ensure(empty($object), $message);
+}
+
+function assert_not_empty($object, $message = 'was expected to be empty') {
+    ensure(!empty($object), $message);
+}
+
 function assert_not_identical($value, $other, $message = '') {
     ensure($value !== $other, $message);
 }
