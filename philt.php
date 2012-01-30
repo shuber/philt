@@ -1,8 +1,12 @@
 <?php
 
+require_once 'phphaml/library.php';
+phphaml\Library::autoload();
+
 require_once 'philt/binding.php';
 require_once 'philt/source.php';
 require_once 'philt/template.php';
+require_once 'philt/haml_template.php';
 require_once 'philt/nested_template.php';
 require_once 'philt/php_template.php';
 require_once 'philt/string_template.php';
@@ -61,6 +65,7 @@ class Philt {
     }
 
     function register_default_handlers() {
+        $this->register('Philt\HamlTemplate', 'haml');
         $this->register('Philt\PhpTemplate', 'php');
         $this->register('Philt\StringTemplate', 'str');
     }
