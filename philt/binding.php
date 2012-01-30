@@ -50,6 +50,7 @@ class Binding {
                 if (method_exists($class, self::EXTENDED_METHOD)) call_user_func(array($class, self::EXTENDED_METHOD), $this);
             }
         }
+        return $this;
     }
 
     function method($method, $caller = null) {
@@ -75,7 +76,7 @@ class Binding {
     function super() {
         $arguments = func_get_args();
         $backtrace = debug_backtrace();
-        if (isset($backtrace[1]) && is_a($backtrace[1]['object'], __CLASS__)) {
+        if (isset($backtrace[1]) && isset($backtrace[1]['object']) && is_a($backtrace[1]['object'], __CLASS__)) {
             $class = $backtrace[1]['class'];
             $method = $backtrace[1]['function'];
             if ($callee = $this->method($method, $class)) return $this->call($callee, $arguments);
@@ -86,7 +87,7 @@ class Binding {
     protected function call($callee, $arguments) {
         $variables = array();
         foreach ($arguments as $key => $value) $variables[] = '$arguments['.$key.']';
-        eval('$value = '.implode('::', $callee).'('.implode(',', $variables).');'); // [TODO] Remove @
+        eval('$value = @'.implode('::', $callee).'('.implode(',', $variables).');'); // [TODO] Remove @
         return $value;
     }
 
