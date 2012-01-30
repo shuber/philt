@@ -32,7 +32,8 @@ function assert_not_empty($object, $message = 'was expected to be empty') {
     ensure(!empty($object), $message);
 }
 
-function assert_not_identical($value, $other, $message = '') {
+function assert_not_identical($value, $other, $message = null) {
+    if (is_null($message)) $message = 'was expected not to be identical to '.print_r($other, true);
     ensure($value !== $other, $message);
 }
 

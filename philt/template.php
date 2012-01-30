@@ -2,7 +2,7 @@
 
 namespace Philt;
 
-class Template {
+abstract class Template {
 
     public $binding;
     public $options;
