@@ -6,8 +6,8 @@ class PhpTemplate extends Template {
 
     function render($locals = array()) {
         ob_start();
-        extract($locals);
-        include $this->file;
+        extract($this->binding($locals));
+        include $this->source->file;
         return ob_get_clean();
     }
 

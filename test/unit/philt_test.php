@@ -9,41 +9,41 @@ class PhiltTest extends ztest\UnitTestCase {
     // #clear
 
         function test_clear() {
-            assert_not_empty($this->philt->mappings);
+            assert_not_empty($this->philt->handlers);
             $this->philt->clear();
-            assert_empty($this->philt->mappings);
+            assert_empty($this->philt->handlers);
         }
 
         function test_clear_with_extension() {
             $this->philt->register('TestHandler', 'test');
-            assert_not_empty($this->philt->mappings['test']);
+            assert_not_empty($this->philt->handlers['test']);
             $this->philt->clear('test');
-            ensure(!isset($this->philt->mappings['test']));
-            assert_not_empty($this->philt->mappings);
+            ensure(!isset($this->philt->handlers['test']));
+            assert_not_empty($this->philt->handlers);
         }
 
         function test_clear_with_multiple_extensions() {
             $this->philt->register('TestHandler', 'test', 'testing');
-            assert_not_empty($this->philt->mappings['test']);
-            assert_not_empty($this->philt->mappings['testing']);
+            assert_not_empty($this->philt->handlers['test']);
+            assert_not_empty($this->philt->handlers['testing']);
             $this->philt->clear('test', 'testing');
-            ensure(!isset($this->philt->mappings['test']));
-            ensure(!isset($this->philt->mappings['testing']));
-            assert_not_empty($this->philt->mappings);
+            ensure(!isset($this->philt->handlers['test']));
+            ensure(!isset($this->philt->handlers['testing']));
+            assert_not_empty($this->philt->handlers);
         }
 
     // #register
 
         function test_register() {
-            ensure(!isset($this->philt->mappings['test']));
+            ensure(!isset($this->philt->handlers['test']));
             $this->philt->register('TestHandler', 'test');
-            assert_equal(array('TestHandler'), $this->philt->mappings['test']);
+            assert_equal(array('TestHandler'), $this->philt->handlers['test']);
         }
 
         function test_register_with_multiple_extensions() {
             $this->philt->register('TestHandler', 'test', 'testing');
-            assert_equal(array('TestHandler'), $this->philt->mappings['test']);
-            assert_equal(array('TestHandler'), $this->philt->mappings['testing']);
+            assert_equal(array('TestHandler'), $this->philt->handlers['test']);
+            assert_equal(array('TestHandler'), $this->philt->handlers['testing']);
         }
 
     // #registered
