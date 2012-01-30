@@ -12,7 +12,7 @@ class Source {
         if (is_file($file)) {
             $this->file = $file;
         } else {
-            $this->file = 'philt://'.md5($file);
+            $this->file = 'data://text/plain,'.urlencode($file);
             self::$cache[$this->file] = $file;
         }
     }

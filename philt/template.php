@@ -5,13 +5,11 @@ namespace Philt;
 class Template {
 
     public $binding;
-    public $file;
     public $options;
     public $source;
 
     function __construct($file, &$options = array()) {
         $this->binding = new Binding;
-        $this->file = $file;
         $this->options = $options;
         $this->source = new Source($file);
     }

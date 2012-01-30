@@ -12,8 +12,11 @@ class NestedTemplate extends Template {
     }
 
     function render($locals = array()) {
-        $contents = $this->file;
-        foreach ($this->handlers as $handler) $contents = \Philt::initialize_handler($handler, $contents, $this->options)->render($locals);
+        $contents = $this->source->file;
+        foreach ($this->handlers as $handler) {
+            $handler = \Philt::initialize_handler($handler, $contents, $this->options);
+            $contents = $handler->render($locals);
+        }
         return $contents;
     }
 
