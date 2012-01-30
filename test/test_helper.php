@@ -1,5 +1,7 @@
 <?php
 
+define('PHILT_TEMPLATES_ROOT', __DIR__.DIRECTORY_SEPARATOR.'templates');
+
 function assert_all_equal($value, $other) {
     $arguments = func_get_args();
     $value = array_shift($arguments);

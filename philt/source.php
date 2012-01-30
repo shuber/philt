@@ -5,6 +5,7 @@ namespace Philt;
 class Source {
 
     static $cache = array();
+    static $compile_prefix = 'data://text/plain,';
 
     public $file;
 
@@ -12,7 +13,7 @@ class Source {
         if (is_file($file)) {
             $this->file = $file;
         } else {
-            $this->file = 'data://text/plain,'.urlencode($file);
+            $this->file = self::$compile_prefix.urlencode($file);
             self::$cache[$this->file] = $file;
         }
     }
