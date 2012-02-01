@@ -26,6 +26,12 @@ namespace BindingTest {
             return true;
         }
     }
+
+    class ErrorHandler {
+        static function error_handler($number, $message, $file, $line, $context) {
+            return 'test';
+        }
+    }
 }
 
 namespace {
@@ -37,6 +43,11 @@ namespace {
             $this->s3 = __CLASS__.'\\S3AssetHelpers';
             $class = $this->assets;
             $class::$extended_binding = null;
+            $this->get_error_handler = (function() {
+                $handler = set_error_handler(function () {});
+                restore_error_handler();
+                return $handler;
+            });
         }
 
         // #__call
@@ -142,6 +153,46 @@ namespace {
                 $binding->extend($this->assets, $this->s3);
                 assert_equal('http://example.s3.amazonaws.com/assets/test.png', $binding->asset_path('test.png'));
                 assert_throws('BadMethodCallException', function() use ($binding) { $binding->bad_super(); });
+            }
+
+        // ::error_handler
+
+            function test_error_handler() {
+                $file = dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'philt'.DIRECTORY_SEPARATOR.'binding.php';
+                ensure(!Philt\Binding::error_handler(1, 'error message', __FILE__, 1, array()));
+                ensure(!Philt\Binding::error_handler(1, 'error message', $file, 1, array()));
+                ensure(!Philt\Binding::error_handler(Philt\Binding::NON_STATIC_METHOD_CALL_ERROR, 'error message', __FILE__, 1, array()));
+                ensure(!Philt\Binding::error_handler(Philt\Binding::NON_STATIC_METHOD_CALL_ERROR, 'error message', $file, 1, array()));
+                assert_null(Philt\Binding::error_handler(Philt\Binding::NON_STATIC_METHOD_CALL_ERROR, 'error message', $file.'-eval', 1, array()));
+            }
+
+            function test_error_handler_with_original_error_handler() {
+                $original = Philt\Binding::$original_error_handler;
+                Philt\Binding::$original_error_handler = array(__CLASS__.'\\ErrorHandler', 'error_handler');
+                assert_equal('test', Philt\Binding::error_handler(1, 'error message', $file, 1, array()));
+                Philt\Binding::$original_error_handler = $original;
+            }
+
+        // ::initialize
+
+            function test_initialize() {
+                $get_error_handler = $this->get_error_handler;
+                restore_error_handler();
+                Philt\Binding::$initialized = false;
+                $binding = new Philt\Binding;
+                ensure(Philt\Binding::$initialized);
+                assert_equal(array('Philt\Binding', 'error_handler'), $get_error_handler());
+            }
+
+        // ::register_error_handler
+
+            function test_register_error_handler() {
+                restore_error_handler();
+                $get_error_handler = $this->get_error_handler;
+                $handler = $get_error_handler();
+                assert_equal($handler, Philt\Binding::register_error_handler());
+                assert_equal(array('Philt\Binding', 'error_handler'), $get_error_handler());
+                assert_not_equal($handler, $get_error_handler());
             }
 
     }

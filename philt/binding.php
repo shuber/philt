@@ -6,12 +6,17 @@ class Binding {
     const CALLABLE_METHOD = 'invoke';
     const MISSING_METHOD = 'method_missing';
     const EXTENDED_METHOD = 'extended';
+    const NON_STATIC_METHOD_CALL_ERROR = 2048;
+
+    static $initialized = false;
+    static $original_error_handler;
 
     public $ancestors = array();
     public $locals;
     public $methods = array();
 
     function __construct($locals = array()) {
+        if (!self::$initialized) self::initialize();
         $this->locals = $locals;
         $this->extend_method(__CLASS__, self::MISSING_METHOD);
     }
@@ -87,12 +92,27 @@ class Binding {
     protected function call($callee, $arguments) {
         $variables = array();
         foreach ($arguments as $key => $value) $variables[] = '$arguments['.$key.']';
-        eval('$value = @'.implode('::', $callee).'('.implode(',', $variables).');'); // [TODO] Remove @
+        eval('$value = '.implode('::', $callee).'('.implode(',', $variables).');');
         return $value;
     }
 
     protected function extend_method($class, $method) {
         if (!isset($this->methods[$method])) $this->methods[$method] = array();
         array_unshift($this->methods[$method], $class);
+    }
+
+    static function error_handler($number, $message, $file, $line, $context) {
+        if ($number != self::NON_STATIC_METHOD_CALL_ERROR || !preg_match('#^'.__FILE__.'.+eval#', $file)) {
+            return self::$original_error_handler ? call_user_func_array(self::$original_error_handler, func_get_args()) : false;
+        }
+    }
+
+    static function register_error_handler() {
+        return self::$original_error_handler = set_error_handler(array(__CLASS__, 'error_handler'));
+    }
+
+    static protected function initialize() {
+        self::register_error_handler();
+        self::$initialized = true;
     }
 }
